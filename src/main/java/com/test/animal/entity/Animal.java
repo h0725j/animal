@@ -3,6 +3,9 @@ package com.test.animal.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 @Entity
 @Getter
 @Setter
@@ -18,7 +21,7 @@ public class Animal {
 
     private String desertionNo; // 구조번호
 
-    private String happenDt; // 접수일
+    private LocalDate happenDt; // 접수일
 
     private String happenPlace; // 발견장소
 
@@ -38,9 +41,9 @@ public class Animal {
 
     private String noticeNo; // 공고번호
 
-    private String noticeSdt; // 공고시작일
+    private LocalDate noticeSdt; // 공고시작일
 
-    private String noticeEdt; // 공고종료일
+    private LocalDate noticeEdt; // 공고종료일
 
     @Column(columnDefinition = "TEXT")
     private String popfile1; // 이미지1(텍스트)

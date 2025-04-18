@@ -4,6 +4,9 @@ import com.test.animal.entity.Animal;
 import com.test.animal.entity.Care;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 @Getter
 @Setter
 @Builder
@@ -12,7 +15,7 @@ import lombok.*;
 public class ResponseDto {
     private Long adoptionId; // 입양id
     private String desertionNo; // 구조번호
-    private String happenDt; // 접수일
+    private LocalDate happenDt; // 접수일
     private String happenPlace; // 발견장소
     private String upKindCd; // 축종코드
     private String upKindNm; // 축종명
@@ -22,8 +25,8 @@ public class ResponseDto {
     private String age; // 나이
     private String weight; // 체중
     private String noticeNo; // 공고번호
-    private String noticeSdt; // 공고시작일
-    private String noticeEdt; // 공고종료일
+    private LocalDate noticeSdt; // 공고시작일
+    private LocalDate noticeEdt; // 공고종료일
     private String popfile1; // 이미지1(텍스트)
     private String popfile2; // 이미지2(텍스트)
     private String processState; // 상태

@@ -16,6 +16,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Slf4j
@@ -68,17 +71,22 @@ public class AnimalService {
 
                     for(ApiResponse.Item item : items) {
                         // 날짜 변환
-                        Date happenDate = null;
-                        Date noticeDate = null;
+                        LocalDate happenDate = null;
+                        LocalDate noticeSdt = null;
+                        LocalDate noticeEdt = null;
+                        DateTimeFormatter formatter = null;
                         try {
-                            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+                            formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                             if (item.getHappenDt() != null && !item.getHappenDt().isEmpty()) {
-                                happenDate = formatter.parse(item.getHappenDt());
+                                happenDate = LocalDate.parse(item.getHappenDt(), formatter);
                             }
                             if (item.getNoticeSdt() != null && !item.getNoticeSdt().isEmpty()) {
-                                noticeDate = formatter.parse(item.getNoticeSdt());
+                                noticeSdt = LocalDate.parse(item.getNoticeSdt(), formatter);
                             }
-                        } catch (ParseException e) {
+                            if (item.getNoticeEdt() != null && !item.getNoticeEdt().isEmpty()) {
+                                noticeEdt = LocalDate.parse(item.getNoticeEdt(), formatter);
+                            }
+                        } catch (DateTimeParseException e) {
                             log.error("날짜 파싱 오류: {}", e.getMessage());
                         }
 
@@ -88,7 +96,7 @@ public class AnimalService {
 
                         ResponseDto responseDto = ResponseDto.builder()
                                 .desertionNo(item.getDesertionNo())
-                                .happenDt(item.getHappenDt())
+                                .happenDt(happenDate)
                                 .happenPlace(item.getHappenPlace())
                                 .upKindNm(item.getUpKindNm())
                                 .upKindCd(item.getUpKindCd())
@@ -98,8 +106,8 @@ public class AnimalService {
                                 .age(item.getAge())
                                 .weight(item.getWeight())
                                 .noticeNo(item.getNoticeNo())
-                                .noticeSdt(item.getNoticeSdt())
-                                .noticeEdt(item.getNoticeEdt())
+                                .noticeSdt(noticeSdt)
+                                .noticeEdt(noticeEdt)
                                 .popfile1(item.getPopfile1())
                                 .popfile2(item.getPopfile2())
                                 .processState(item.getProcessState())
