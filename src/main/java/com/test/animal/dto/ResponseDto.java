@@ -23,7 +23,7 @@ public class ResponseDto {
     private String weight; // 체중
     private String noticeNo; // 공고번호
     private String noticeSdt; // 공고시작일
-    private String noticeEdt; // 공고시작일
+    private String noticeEdt; // 공고종료일
     private String popfile1; // 이미지1(텍스트)
     private String popfile2; // 이미지2(텍스트)
     private String processState; // 상태
@@ -52,6 +52,7 @@ public class ResponseDto {
                 .weight(this.weight)
                 .noticeNo(this.noticeNo)
                 .noticeSdt(this.noticeSdt)
+                .noticeEdt(this.noticeEdt)
                 .popfile1(this.popfile1)
                 .popfile2(this.popfile2)
                 .processState(this.processState)
