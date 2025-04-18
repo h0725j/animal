@@ -40,6 +40,8 @@ public class Animal {
 
     private String noticeSdt; // 공고시작일
 
+    private String noticeEdt; // 공고종료일
+
     @Column(columnDefinition = "TEXT")
     private String popfile1; // 이미지1(텍스트)
 

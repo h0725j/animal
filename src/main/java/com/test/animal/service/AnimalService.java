@@ -97,6 +97,7 @@ public class AnimalService {
                                 .weight(item.getWeight())
                                 .noticeNo(item.getNoticeNo())
                                 .noticeSdt(item.getNoticeSdt())
+                                .noticeEdt(item.getNoticeEdt())
                                 .popfile1(item.getPopfile1())
                                 .popfile2(item.getPopfile2())
                                 .processState(item.getProcessState())
