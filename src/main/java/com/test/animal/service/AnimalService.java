@@ -36,7 +36,7 @@ public class AnimalService {
             log.info("데이터 가져오기: 페이지 {}, 페이지당 {} 건", pageNo, numOfRows);
 
             URI uri = UriComponentsBuilder.fromHttpUrl("https://apis.data.go.kr/1543061/abandonmentPublicService_v2/abandonmentPublic_v2")
-                    .queryParam("serviceKey", "mIh16wSgE8R9SjJMMwvxYwP%2BInJxEi0M5ZLimKlsKz6nIjuGNb6aEPbGyEU2bT4s1ty83mIWB4fW8h5N3u9LCA%3D%3D")
+                    .queryParam("serviceKey", "0O1KlLSEEGjpWzJOBa8Q9Mxfc3g%2FA%2BPSVTzNt3XSLdZdVuyaUMWYmsgAPe%2FwolWOrEVyUAYuk9rzp4VNwHNBOg%3D%3D")
                     .queryParam("numOfRows", numOfRows)
                     .queryParam("pageNo", pageNo)
                     .queryParam("_type", "json")
@@ -90,8 +90,8 @@ public class AnimalService {
                                 .desertionNo(item.getDesertionNo())
                                 .happenDt(item.getHappenDt())
                                 .happenPlace(item.getHappenPlace())
-                                .upKindNm(upKind)
-                                .kindCd(kind)
+                                .upKindNm(item.getUpKindNm())
+                                .kindCd(item.getKindCd())
                                 .colorCd(item.getColorCd())
                                 .age(item.getAge())
                                 .weight(item.getWeight())
@@ -104,6 +104,7 @@ public class AnimalService {
                                 .neuterYn(item.getNeuterYn())
                                 .specialMark(item.getSpecialMark())
                                 .careNm(item.getCareNm())
+                                .careRegNo(item.getCareRegNo())
                                 .careTel(item.getCareTel())
                                 .careAddr(item.getCareAddr())
                                 .careOwnerNm(item.getCareOwnerNm())
