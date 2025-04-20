@@ -4,6 +4,8 @@ import com.test.animal.dto.ApiResponse;
 import com.test.animal.dto.ResponseDto;
 import com.test.animal.entity.Animal;
 import com.test.animal.entity.Care;
+import com.test.animal.enums.UpKindCd;
+import com.test.animal.enums.UpKindNm;
 import com.test.animal.repository.AnimalRepository;
 import com.test.animal.repository.CareRepository;
 import lombok.RequiredArgsConstructor;
@@ -96,19 +98,21 @@ public class AnimalService {
                         }
 
                         // 품종 정보 처리 - API 응답에 upKindNm과 kindNm이 있으므로 직접 사용
-                        String upKind = item.getUpKindNm();
+                        String upKindNm = UpKindNm.fromValue(item.getUpKindNm());
+                        String upKindCd = UpKindCd.fromValue(item.getUpKindCd());
+
                         String kind = item.getKindNm();
 
                         ResponseDto responseDto = ResponseDto.builder()
                                 .desertionNo(item.getDesertionNo())
                                 .happenDt(happenDate)
                                 .happenPlace(item.getHappenPlace())
-                                .upKindNm(item.getUpKindNm())
-                                .upKindCd(item.getUpKindCd())
+                                .upKindNm(upKindNm)
+                                .upKindCd(upKindCd)
                                 .kindCd(item.getKindCd())
                                 .kindNm(item.getKindNm())
                                 .colorCd(item.getColorCd())
-                                .age(item.getAge())
+                                .age(item.getAge().substring(0, 4))
                                 .weight(item.getWeight())
                                 .noticeNo(item.getNoticeNo())
                                 .noticeSdt(noticeSdt)
