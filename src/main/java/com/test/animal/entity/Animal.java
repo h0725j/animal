@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -59,7 +60,7 @@ public class Animal {
 
     private String specialMark; // 특징
 
-    private String updTm; // 수정일
+    private LocalDateTime updTm; // 수정일
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "shelter_id")

@@ -17,6 +17,7 @@ import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -74,9 +75,11 @@ public class AnimalService {
                         LocalDate happenDate = null;
                         LocalDate noticeSdt = null;
                         LocalDate noticeEdt = null;
-                        DateTimeFormatter formatter = null;
+                        LocalDateTime updTm = null;
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.0");
+
                         try {
-                            formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                             if (item.getHappenDt() != null && !item.getHappenDt().isEmpty()) {
                                 happenDate = LocalDate.parse(item.getHappenDt(), formatter);
                             }
@@ -85,6 +88,9 @@ public class AnimalService {
                             }
                             if (item.getNoticeEdt() != null && !item.getNoticeEdt().isEmpty()) {
                                 noticeEdt = LocalDate.parse(item.getNoticeEdt(), formatter);
+                            }
+                            if (item.getUpdTm() != null && !item.getUpdTm().isEmpty()) {
+                                updTm = LocalDateTime.parse(item.getUpdTm(), dateTimeFormatter);
                             }
                         } catch (DateTimeParseException e) {
                             log.error("날짜 파싱 오류: {}", e.getMessage());
@@ -120,7 +126,7 @@ public class AnimalService {
                                 .careAddr(item.getCareAddr())
                                 .careOwnerNm(item.getCareOwnerNm())
                                 .orgNm(item.getOrgNm())
-                                .updTm(item.getUpdTm())
+                                .updTm(updTm)
                                 .build();
 
                         responseDtos.add(responseDto);

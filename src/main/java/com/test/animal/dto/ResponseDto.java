@@ -5,6 +5,7 @@ import com.test.animal.entity.Care;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -39,7 +40,7 @@ public class ResponseDto {
     private String careAddr; // 보호 장소
     private String careOwnerNm; // 관할기관
     private String orgNm; // 기관지역명
-    private String updTm; // 수정일
+    private LocalDateTime updTm; // 수정일
 
     public Animal toEntityanimal() {
         return Animal.builder()
