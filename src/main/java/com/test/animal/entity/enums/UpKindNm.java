@@ -1,13 +1,13 @@
-package com.test.animal.enums;
+package com.test.animal.entity.enums;
 
-public enum UpKindCd {
-    DOG("417000"),
-    CAT("422400"),
-    ETC("429900");
+public enum UpKindNm {
+    DOG("개"),
+    CAT("고양이"),
+    ETC("기타");
 
     private final String value;
 
-    UpKindCd(String value) {
+    UpKindNm(String value) {
         this.value = value;
     }
 
@@ -16,12 +16,12 @@ public enum UpKindCd {
     }
 
     public static String fromValue(String value) {
-        for (UpKindCd kind : UpKindCd.values()) {
+        for (UpKindNm kind : UpKindNm.values()) {
             if (kind.getValue().equals(value)) {
                 return String.valueOf(kind.getValue());
             }
         }
-        throw new IllegalArgumentException("종류코드 오류: " + value);
+        throw new IllegalArgumentException("종류명 오류: " + value);
     }
 }
 

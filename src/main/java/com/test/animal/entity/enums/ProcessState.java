@@ -1,4 +1,4 @@
-package com.test.animal.entity.type;
+package com.test.animal.entity.enums;
 
 import lombok.Getter;
 

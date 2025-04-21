@@ -2,19 +2,19 @@ package com.test.animal.dto;
 
 import com.test.animal.entity.Animal;
 import com.test.animal.entity.Shelter;
-import com.test.animal.entity.type.ActiveState;
-import com.test.animal.entity.type.NeuterYn;
-import com.test.animal.entity.type.ProcessState;
-import com.test.animal.entity.type.SexCd;
+import com.test.animal.entity.enums.ActiveState;
+import com.test.animal.entity.enums.NeuterYn;
+import com.test.animal.entity.enums.ProcessState;
+import com.test.animal.entity.enums.SexCd;
+import com.test.animal.entity.enums.UpKindCd;
+import com.test.animal.entity.enums.UpKindNm;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -31,7 +31,7 @@ public class AnimalResponseDto {
     private String kindCd; // 품종코드
     private String kindNm; // 품종명
     private String colorCd; // 색상
-    private String age; // 나이
+    private Integer age; // 나이
     private String weight; // 체중
     private String noticeNo; // 공고번호
     private LocalDate noticeSdt; // 공고시작일
@@ -42,7 +42,7 @@ public class AnimalResponseDto {
     private String sexCd; // 성별(타입)
     private String neuterYn; // 중성화여부(타입)
     private String specialMark; // 특징
-    private String updTm; // 수정일
+    private LocalDateTime updTm; // 수정일
 
     // Care 엔티티 정보
     private String careRegNo; // 보호소 번호
@@ -51,15 +51,14 @@ public class AnimalResponseDto {
     private String careAddr; // 보호 장소
     private String careOwnerNm; // 관할기관
     private String orgNm; // 기관지역명
-    private LocalDateTime updTm; // 수정일
 
     public Animal toEntityanimal() {
         Animal animal = Animal.builder()
                 .desertionNo(this.desertionNo)
                 .happenDt(this.happenDt)
                 .happenPlace(this.happenPlace)
-                .upKindNm(this.upKindNm)
-                .upKindCd(this.upKindCd)
+                .upKindCd(convertToUpKindCd(this.upKindCd))
+                .upKindNm(convertToUpKindNm(this.upKindNm))
                 .kindNm(this.kindNm)
                 .kindCd(this.kindCd)
                 .colorCd(this.colorCd)
@@ -84,6 +83,30 @@ public class AnimalResponseDto {
         }
 
         return animal;
+    }
+
+    private UpKindNm convertToUpKindNm(String upKindNm) {
+        if (upKindNm == null) {
+            return null;
+        }
+
+        try {
+            return UpKindNm.valueOf(upKindNm);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private UpKindCd convertToUpKindCd(String upKindCd) {
+        if (upKindCd == null) {
+            return null;
+        }
+
+        try {
+            return UpKindCd.valueOf(upKindCd);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private ProcessState convertToProcessState(String processState) {
@@ -132,5 +155,4 @@ public class AnimalResponseDto {
                 .orgNm(this.orgNm)
                 .build();
     }
-
 }

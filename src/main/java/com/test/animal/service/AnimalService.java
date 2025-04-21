@@ -4,25 +4,27 @@ import com.test.animal.dto.AnimalApiResponse;
 import com.test.animal.dto.AnimalResponseDto;
 import com.test.animal.entity.Animal;
 import com.test.animal.entity.Shelter;
-import com.test.animal.entity.Care;
-import com.test.animal.enums.UpKindCd;
-import com.test.animal.enums.UpKindNm;
 import com.test.animal.repository.AnimalRepository;
 import com.test.animal.repository.ShelterRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import java.net.URI;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Service
@@ -31,6 +33,7 @@ public class AnimalService {
     private final RestTemplate restTemplate;
     private final AnimalRepository animalRepository;
     private final ShelterRepository shelterRepository;
+    private final AnimalEsService animalEsService;
 
     public List<AnimalResponseDto> saveAnimals() {
         List<AnimalResponseDto> allAnimalResponseDtos = new ArrayList<>();
@@ -92,36 +95,25 @@ public class AnimalService {
                                 noticeEdt = LocalDate.parse(item.getNoticeEdt(), formatter);
                             }
                             if (item.getUpdTm() != null && !item.getUpdTm().isEmpty()) {
-                                updTm = LocalDateTime.parse(item.getUpdTm(), dateTimeFormatter);
+                                updTm = LocalDateTime.parse(item.getUpdTm(), dateTimeFormatter)
+                                        .truncatedTo(ChronoUnit.SECONDS);
                             }
                         } catch (DateTimeParseException e) {
                             log.error("날짜 파싱 오류: {}", e.getMessage());
                         }
 
                         // 품종 정보 처리 - API 응답에 upKindNm과 kindNm이 있으므로 직접 사용
-                        String upKindNm = item.getUpKindNm();
-                        String upKindCd = item.getUpKindCd();
-                        String kindNm = item.getKindNm();
-                        String kindCd = item.getKindCd();
-                        String upKindNm = UpKindNm.fromValue(item.getUpKindNm());
-                        String upKindCd = UpKindCd.fromValue(item.getUpKindCd());
-
-                        String kind = item.getKindNm();
 
                         AnimalResponseDto animalResponseDto = AnimalResponseDto.builder()
                                 .desertionNo(item.getDesertionNo())
                                 .happenDt(happenDate)
                                 .happenPlace(item.getHappenPlace())
-                                .upKindNm(upKindNm)
-                                .upKindCd(upKindCd)
-                                .kindNm(kindNm)
-                                .kindCd(kindCd)
-                                .upKindNm(upKindNm)
-                                .upKindCd(upKindCd)
+                                .upKindCd(item.getUpKindCd())
+                                .upKindNm(item.getUpKindNm())
                                 .kindCd(item.getKindCd())
                                 .kindNm(item.getKindNm())
                                 .colorCd(item.getColorCd())
-                                .age(item.getAge().substring(0, 4))
+                                .age(parseInt(item.getAge(), null))
                                 .weight(item.getWeight())
                                 .noticeNo(item.getNoticeNo())
                                 .noticeSdt(noticeSdt)
@@ -139,7 +131,6 @@ public class AnimalService {
                                 .careOwnerNm(item.getCareOwnerNm())
                                 .orgNm(item.getOrgNm())
                                 .updTm(updTm)
-                                .updTm(item.getUpdTm())
                                 .careNm(item.getCareNm())
                                 .build();
 
@@ -186,7 +177,6 @@ public class AnimalService {
 
                 animal.setShelter(shelter);
                 if (shelter != null) {
-                    log.info("동물 {} 에 보호소 ID {} 설정됨", animal.getDesertionNo(), shelter.getShelterId());
                 } else {
                     log.warn("동물 {} 에 보호소 정보가 없어 null로 설정됨", animal.getDesertionNo());
                 }
@@ -197,11 +187,12 @@ public class AnimalService {
             if (!animals.isEmpty()) {
                 animalRepository.saveAll(animals);
                 log.info("총 {} 건의 데이터를 데이터베이스에 저장했습니다.", animals.size());
+
+                animalEsService.saveBulk(animals);
             } else {
                 log.warn("저장할 동물 데이터가 없습니다.");
             }
         }
-
 
         return allAnimalResponseDtos;
     }
@@ -241,6 +232,21 @@ public class AnimalService {
 
         return null;
 
+    }
+
+    private Integer parseInt(String value, Integer defaultValue) {
+        if (value == null || value.isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            String age = value.substring(0, 4);
+            if (age.isEmpty()) {
+                return defaultValue;
+            }
+            return Integer.parseInt(age);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }
 

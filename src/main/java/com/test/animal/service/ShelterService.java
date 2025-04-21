@@ -5,11 +5,11 @@ import com.test.animal.dto.ShelterResponseDto;
 import com.test.animal.entity.Shelter;
 import com.test.animal.repository.ShelterRepository;
 import java.net.URI;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,18 +77,20 @@ public class ShelterService {
                     List<ShelterResponseDto> shelterResponseDtos = new ArrayList<>();
 
                     for (ShelterApiResponse.Item item : items) {
-                        Date dsignationDate = null;
-                        Date dateStdDt = null;
+
+                        // 날짜 변환
+                        LocalDate dsignationDate = null;
+                        LocalDate dataStdDt = null;
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
                         try {
-                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                            if (item.getDsignationDate() != null && !item.getDsignationDate()
-                                    .isEmpty()) {
-                                dsignationDate = formatter.parse(item.getDsignationDate());
+                            if (item.getDsignationDate() != null && !item.getDsignationDate().isEmpty()) {
+                                dsignationDate = LocalDate.parse(item.getDsignationDate(), formatter);
                             }
                             if (item.getDataStdDt() != null && !item.getDataStdDt().isEmpty()) {
-                                dateStdDt = formatter.parse(item.getDataStdDt());
+                                dataStdDt = LocalDate.parse(item.getDataStdDt(), formatter);
                             }
-                        } catch (ParseException e) {
+                        } catch (DateTimeParseException e) {
                             log.error("날짜 파싱 오류: {}", e.getMessage());
                         }
 
@@ -100,16 +102,27 @@ public class ShelterService {
                                 .saveTrgtAnimal(item.getSaveTrgtAnimal())
                                 .careAddr(item.getCareAddr())
                                 .jibunAddr(item.getJibunAddr())
-                                .lat(item.getLat())
-                                .lng(item.getLng())
+                                .lat(parseDouble(item.getLat(), null))
+                                .lng(parseDouble(item.getLng(), null))
                                 .dsignationDate(dsignationDate)
                                 .weekOprStime(item.getWeekOprStime())
                                 .weekOprEtime(item.getWeekOprEtime())
+                                .weekCellStime(item.getWeekCellStime())
+                                .weekCellEtime(item.getWeekCellEtime())
+                                .weekendOprStime(item.getWeekendOprStime())
+                                .weekendOprEtime(item.getWeekendOprEtime())
+                                .weekendCellStime(item.getWeekendCellStime())
+                                .weekendCellEtime(item.getWeekendCellEtime())
                                 .closeDay(item.getCloseDay())
-                                .vetPersonCnt(item.getVetPersonCnt())
-                                .specsPersonCnt(item.getSpecsPersonCnt())
+                                .vetPersonCnt(parseInt(item.getVetPersonCnt(), null))
+                                .specsPersonCnt(parseInt(item.getSpecsPersonCnt(), null))
+                                .medicalCnt(parseInt(item.getMedicalCnt(), null))
+                                .breedCnt(parseInt(item.getBreedCnt(), null))
+                                .quarabtineCnt(parseInt(item.getQuarabtineCnt(), null))
+                                .feedCnt(parseInt(item.getFeedCnt(), null))
+                                .transCarCnt(parseInt(item.getTransCarCnt(), null))
                                 .careTel(item.getCareTel())
-                                .dataStdDt(dateStdDt)
+                                .dataStdDt(dataStdDt)
                                 .build();
 
                         shelterResponseDtos.add(shelterResponseDto);
@@ -157,7 +170,6 @@ public class ShelterService {
                     uniqueSheltersMap.put(careNm, shelter);
                 } else {
                     duplicateCount++;
-                    log.info("중복된 보호소 발견: {}", careNm);
                 }
             }
 
@@ -192,6 +204,28 @@ public class ShelterService {
         }
 
         return allShelterResponseDtos;
+    }
+
+    private Integer parseInt(String value, Integer defaultValue) {
+        if (value == null || value.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private Double parseDouble(String value, Double defaultValue) {
+        if (value == null || value.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Double.parseDouble(value.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }
 

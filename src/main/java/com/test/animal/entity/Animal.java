@@ -1,9 +1,11 @@
 package com.test.animal.entity;
 
-import com.test.animal.entity.type.ActiveState;
-import com.test.animal.entity.type.NeuterYn;
-import com.test.animal.entity.type.ProcessState;
-import com.test.animal.entity.type.SexCd;
+import com.test.animal.entity.enums.ActiveState;
+import com.test.animal.entity.enums.NeuterYn;
+import com.test.animal.entity.enums.ProcessState;
+import com.test.animal.entity.enums.SexCd;
+import com.test.animal.entity.enums.UpKindCd;
+import com.test.animal.entity.enums.UpKindNm;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,15 +17,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Getter
@@ -44,9 +44,11 @@ public class Animal {
 
     private String happenPlace; // 발견장소
 
-    private String upKindNm; // 축종명
+    @Enumerated(EnumType.STRING)
+    private UpKindNm upKindNm; // 축종명
 
-    private String upKindCd; // 축종코드
+    @Enumerated(EnumType.STRING)
+    private UpKindCd upKindCd; // 축종코드
 
     private String kindNm; // 품종명
 
@@ -54,7 +56,7 @@ public class Animal {
 
     private String colorCd; // 색상
 
-    private String age; // 나이
+    private Integer age; // 나이 - Long
 
     private String weight; // 체중
 
