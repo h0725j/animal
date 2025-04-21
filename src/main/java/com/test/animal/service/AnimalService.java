@@ -4,6 +4,8 @@ import com.test.animal.dto.ApiResponse;
 import com.test.animal.dto.ResponseDto;
 import com.test.animal.entity.Animal;
 import com.test.animal.entity.Care;
+import com.test.animal.enums.UpKindCd;
+import com.test.animal.enums.UpKindNm;
 import com.test.animal.repository.AnimalRepository;
 import com.test.animal.repository.CareRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +16,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Slf4j
@@ -36,7 +41,7 @@ public class AnimalService {
             log.info("데이터 가져오기: 페이지 {}, 페이지당 {} 건", pageNo, numOfRows);
 
             URI uri = UriComponentsBuilder.fromHttpUrl("https://apis.data.go.kr/1543061/abandonmentPublicService_v2/abandonmentPublic_v2")
-                    .queryParam("serviceKey", "mIh16wSgE8R9SjJMMwvxYwP%2BInJxEi0M5ZLimKlsKz6nIjuGNb6aEPbGyEU2bT4s1ty83mIWB4fW8h5N3u9LCA%3D%3D")
+                    .queryParam("serviceKey", "0O1KlLSEEGjpWzJOBa8Q9Mxfc3g%2FA%2BPSVTzNt3XSLdZdVuyaUMWYmsgAPe%2FwolWOrEVyUAYuk9rzp4VNwHNBOg%3D%3D")
                     .queryParam("numOfRows", numOfRows)
                     .queryParam("pageNo", pageNo)
                     .queryParam("_type", "json")
@@ -68,35 +73,50 @@ public class AnimalService {
 
                     for(ApiResponse.Item item : items) {
                         // 날짜 변환
-                        Date happenDate = null;
-                        Date noticeDate = null;
+                        LocalDate happenDate = null;
+                        LocalDate noticeSdt = null;
+                        LocalDate noticeEdt = null;
+                        LocalDateTime updTm = null;
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.0");
+
                         try {
-                            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
                             if (item.getHappenDt() != null && !item.getHappenDt().isEmpty()) {
-                                happenDate = formatter.parse(item.getHappenDt());
+                                happenDate = LocalDate.parse(item.getHappenDt(), formatter);
                             }
                             if (item.getNoticeSdt() != null && !item.getNoticeSdt().isEmpty()) {
-                                noticeDate = formatter.parse(item.getNoticeSdt());
+                                noticeSdt = LocalDate.parse(item.getNoticeSdt(), formatter);
                             }
-                        } catch (ParseException e) {
+                            if (item.getNoticeEdt() != null && !item.getNoticeEdt().isEmpty()) {
+                                noticeEdt = LocalDate.parse(item.getNoticeEdt(), formatter);
+                            }
+                            if (item.getUpdTm() != null && !item.getUpdTm().isEmpty()) {
+                                updTm = LocalDateTime.parse(item.getUpdTm(), dateTimeFormatter);
+                            }
+                        } catch (DateTimeParseException e) {
                             log.error("날짜 파싱 오류: {}", e.getMessage());
                         }
 
                         // 품종 정보 처리 - API 응답에 upKindNm과 kindNm이 있으므로 직접 사용
-                        String upKind = item.getUpKindNm();
+                        String upKindNm = UpKindNm.fromValue(item.getUpKindNm());
+                        String upKindCd = UpKindCd.fromValue(item.getUpKindCd());
+
                         String kind = item.getKindNm();
 
                         ResponseDto responseDto = ResponseDto.builder()
                                 .desertionNo(item.getDesertionNo())
-                                .happenDt(item.getHappenDt())
+                                .happenDt(happenDate)
                                 .happenPlace(item.getHappenPlace())
-                                .upKindNm(upKind)
-                                .kindCd(kind)
+                                .upKindNm(upKindNm)
+                                .upKindCd(upKindCd)
+                                .kindCd(item.getKindCd())
+                                .kindNm(item.getKindNm())
                                 .colorCd(item.getColorCd())
-                                .age(item.getAge())
+                                .age(item.getAge().substring(0, 4))
                                 .weight(item.getWeight())
                                 .noticeNo(item.getNoticeNo())
-                                .noticeSdt(item.getNoticeSdt())
+                                .noticeSdt(noticeSdt)
+                                .noticeEdt(noticeEdt)
                                 .popfile1(item.getPopfile1())
                                 .popfile2(item.getPopfile2())
                                 .processState(item.getProcessState())
@@ -104,11 +124,12 @@ public class AnimalService {
                                 .neuterYn(item.getNeuterYn())
                                 .specialMark(item.getSpecialMark())
                                 .careNm(item.getCareNm())
+                                .careRegNo(item.getCareRegNo())
                                 .careTel(item.getCareTel())
                                 .careAddr(item.getCareAddr())
                                 .careOwnerNm(item.getCareOwnerNm())
                                 .orgNm(item.getOrgNm())
-                                .updTm(item.getUpdTm())
+                                .updTm(updTm)
                                 .build();
 
                         responseDtos.add(responseDto);

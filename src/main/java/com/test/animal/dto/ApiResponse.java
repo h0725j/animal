@@ -3,6 +3,7 @@ package com.test.animal.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -55,6 +56,7 @@ public class ApiResponse {
         private String weight; // 체중
         private String noticeNo; // 공고번호
         private String noticeSdt; // 공고시작일
+        private String noticeEdt; // 공고종료일
         private String popfile1; // 이미지1(텍스트)
         private String popfile2; // 이미지2(텍스트)
         private String processState; // 상태
