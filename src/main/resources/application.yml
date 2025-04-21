@@ -12,6 +12,7 @@ spring:
         format-sql: true
     hibernate:
       ddl-auto: create
+    generate-ddl: true
 
 logging:
   level:

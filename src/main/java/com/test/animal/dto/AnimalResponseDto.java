@@ -1,15 +1,23 @@
 package com.test.animal.dto;
 
 import com.test.animal.entity.Animal;
-import com.test.animal.entity.Care;
-import lombok.*;
+import com.test.animal.entity.Shelter;
+import com.test.animal.entity.type.ActiveState;
+import com.test.animal.entity.type.NeuterYn;
+import com.test.animal.entity.type.ProcessState;
+import com.test.animal.entity.type.SexCd;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseDto {
+public class AnimalResponseDto {
     private Long adoptionId; // 입양id
     private String desertionNo; // 구조번호
     private String happenDt; // 접수일
@@ -29,16 +37,18 @@ public class ResponseDto {
     private String sexCd; // 성별(타입)
     private String neuterYn; // 중성화여부(타입)
     private String specialMark; // 특징
+    private String updTm; // 수정일
+
+    // Care 엔티티 정보
     private String careRegNo; // 보호소 번호
     private String careNm; // 보호소 이름
     private String careTel; // 보호소 전화번호
     private String careAddr; // 보호 장소
     private String careOwnerNm; // 관할기관
     private String orgNm; // 기관지역명
-    private String updTm; // 수정일
 
     public Animal toEntityanimal() {
-        return Animal.builder()
+        Animal animal = Animal.builder()
                 .desertionNo(this.desertionNo)
                 .happenDt(this.happenDt)
                 .happenPlace(this.happenPlace)
@@ -53,22 +63,65 @@ public class ResponseDto {
                 .noticeSdt(this.noticeSdt)
                 .popfile1(this.popfile1)
                 .popfile2(this.popfile2)
-                .processState(this.processState)
-                .sexCd(this.sexCd)
-                .neuterYn(this.neuterYn)
+                .processState(convertToProcessState(this.processState))
+                .sexCd(convertToSexCd(this.sexCd))
+                .neuterYn(convertToNeuterYn(this.neuterYn))
                 .specialMark(this.specialMark)
                 .updTm(this.updTm)
-                .care(this.toEntitycare())
                 .build();
+
+        if (animal.getProcessState() == ProcessState.PROTECTED) {
+            animal.setActiveState(ActiveState.ACTIVE);
+        } else {
+            animal.setActiveState(ActiveState.INACTIVE);
+        }
+
+        return animal;
     }
 
-    public Care toEntitycare() {
-        return Care.builder()
+    private ProcessState convertToProcessState(String processState) {
+        if (processState == null) {
+            return null;
+        }
+
+        for(ProcessState state : ProcessState.values()) {
+            if (state.getState().equals(processState) || state.name().equals(processState)) {
+                return state;
+            }
+        }
+        return null;
+    }
+
+    private SexCd convertToSexCd(String sexCd) {
+        if (sexCd == null) {
+            return null;
+        }
+
+        try {
+            return SexCd.valueOf(sexCd);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private NeuterYn convertToNeuterYn(String neuterYn) {
+        if (neuterYn == null) {
+            return null;
+        }
+
+        try {
+            return NeuterYn.valueOf(neuterYn);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public Shelter toEntityShelter() {
+        return Shelter.builder()
                 .careRegNo(this.careRegNo)
                 .careNm(this.careNm)
                 .careTel(this.careTel)
                 .careAddr(this.careAddr)
-                .careOwnerNm(this.careOwnerNm)
                 .orgNm(this.orgNm)
                 .build();
     }

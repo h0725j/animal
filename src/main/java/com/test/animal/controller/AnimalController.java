@@ -1,28 +1,34 @@
 package com.test.animal.controller;
 
-import com.test.animal.dto.ResponseDto;
-import com.test.animal.entity.Animal;
+import com.test.animal.dto.AnimalResponseDto;
+import com.test.animal.dto.ShelterResponseDto;
 import com.test.animal.service.AnimalService;
+import com.test.animal.service.ShelterService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/animals")
 public class AnimalController {
-
     @Autowired
     private AnimalService animalService;
 
-    @GetMapping("/save")
-    public ResponseEntity<List<ResponseDto>> saveAnimal() {
-        List<ResponseDto> responseDtoList = animalService.saveAnimals();
-        return ResponseEntity.ok(responseDtoList);
+    @Autowired
+    private ShelterService shelterService;
+
+
+    @GetMapping("/api/animal/save")
+    public ResponseEntity<List<AnimalResponseDto>> saveAnimal() {
+        List<AnimalResponseDto> animalResponseDtoList = animalService.saveAnimals();
+        return ResponseEntity.ok(animalResponseDtoList);
     }
+
+    @GetMapping("/api/shelter/save")
+    public ResponseEntity<List<ShelterResponseDto>> saveShelter() {
+        List<ShelterResponseDto> shelterResponseDtoList = shelterService.saveShelter();
+        return ResponseEntity.ok(shelterResponseDtoList);
+    }
+
 }

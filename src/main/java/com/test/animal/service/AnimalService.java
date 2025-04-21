@@ -1,11 +1,11 @@
 package com.test.animal.service;
 
-import com.test.animal.dto.ApiResponse;
-import com.test.animal.dto.ResponseDto;
+import com.test.animal.dto.AnimalApiResponse;
+import com.test.animal.dto.AnimalResponseDto;
 import com.test.animal.entity.Animal;
-import com.test.animal.entity.Care;
+import com.test.animal.entity.Shelter;
 import com.test.animal.repository.AnimalRepository;
-import com.test.animal.repository.CareRepository;
+import com.test.animal.repository.ShelterRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -24,10 +24,10 @@ import java.util.*;
 public class AnimalService {
     private final RestTemplate restTemplate;
     private final AnimalRepository animalRepository;
-    private final CareRepository careRepository;
+    private final ShelterRepository shelterRepository;
 
-    public List<ResponseDto> saveAnimals() {
-        List<ResponseDto> allResponseDtos = new ArrayList<>();
+    public List<AnimalResponseDto> saveAnimals() {
+        List<AnimalResponseDto> allAnimalResponseDtos = new ArrayList<>();
         int pageNo = 1;
         int numOfRows = 1000;
         boolean hasMoreData = true;
@@ -53,20 +53,20 @@ public class AnimalService {
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
             try {
-                ResponseEntity<ApiResponse> responseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, ApiResponse.class);
-                ApiResponse apiResponse = responseEntity.getBody();
-                log.info("응답: {}", apiResponse);
+                ResponseEntity<AnimalApiResponse> responseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, AnimalApiResponse.class);
+                AnimalApiResponse animalApiResponse = responseEntity.getBody();
+                log.info("응답: {}", animalApiResponse);
 
-                if(apiResponse != null && apiResponse.getResponse() != null &&
-                        apiResponse.getResponse().getBody() != null &&
-                        apiResponse.getResponse().getBody().getItems() != null &&
-                        apiResponse.getResponse().getBody().getItems().getItem() != null &&
-                        !apiResponse.getResponse().getBody().getItems().getItem().isEmpty()) {
+                if(animalApiResponse != null && animalApiResponse.getResponse() != null &&
+                        animalApiResponse.getResponse().getBody() != null &&
+                        animalApiResponse.getResponse().getBody().getItems() != null &&
+                        animalApiResponse.getResponse().getBody().getItems().getItem() != null &&
+                        !animalApiResponse.getResponse().getBody().getItems().getItem().isEmpty()) {
 
-                    List<ApiResponse.Item> items = apiResponse.getResponse().getBody().getItems().getItem();
-                    List<ResponseDto> responseDtos = new ArrayList<>();
+                    List<AnimalApiResponse.Item> items = animalApiResponse.getResponse().getBody().getItems().getItem();
+                    List<AnimalResponseDto> animalResponseDtos = new ArrayList<>();
 
-                    for(ApiResponse.Item item : items) {
+                    for(AnimalApiResponse.Item item : items) {
                         // 날짜 변환
                         Date happenDate = null;
                         Date noticeDate = null;
@@ -83,15 +83,19 @@ public class AnimalService {
                         }
 
                         // 품종 정보 처리 - API 응답에 upKindNm과 kindNm이 있으므로 직접 사용
-                        String upKind = item.getUpKindNm();
-                        String kind = item.getKindNm();
+                        String upKindNm = item.getUpKindNm();
+                        String upKindCd = item.getUpKindCd();
+                        String kindNm = item.getKindNm();
+                        String kindCd = item.getKindCd();
 
-                        ResponseDto responseDto = ResponseDto.builder()
+                        AnimalResponseDto animalResponseDto = AnimalResponseDto.builder()
                                 .desertionNo(item.getDesertionNo())
                                 .happenDt(item.getHappenDt())
                                 .happenPlace(item.getHappenPlace())
-                                .upKindNm(upKind)
-                                .kindCd(kind)
+                                .upKindNm(upKindNm)
+                                .upKindCd(upKindCd)
+                                .kindNm(kindNm)
+                                .kindCd(kindCd)
                                 .colorCd(item.getColorCd())
                                 .age(item.getAge())
                                 .weight(item.getWeight())
@@ -103,19 +107,15 @@ public class AnimalService {
                                 .sexCd(item.getSexCd())
                                 .neuterYn(item.getNeuterYn())
                                 .specialMark(item.getSpecialMark())
-                                .careNm(item.getCareNm())
-                                .careTel(item.getCareTel())
-                                .careAddr(item.getCareAddr())
-                                .careOwnerNm(item.getCareOwnerNm())
-                                .orgNm(item.getOrgNm())
                                 .updTm(item.getUpdTm())
+                                .careNm(item.getCareNm())
                                 .build();
 
-                        responseDtos.add(responseDto);
+                        animalResponseDtos.add(animalResponseDto);
                     }
 
                     // 현재 페이지의 데이터를 전체 결과 목록에 추가
-                    allResponseDtos.addAll(responseDtos);
+                    allAnimalResponseDtos.addAll(animalResponseDtos);
 
                     // 현재 페이지의 데이터 수가 numOfRows보다 적으면 더 이상 데이터가 없는 것으로 판단
                     if (items.size() < numOfRows) {
@@ -143,56 +143,73 @@ public class AnimalService {
             }
         }
 
-//        // 모든 데이터를 수집한 후 데이터베이스에 저장
-//        if (!allResponseDtos.isEmpty()) {
-//            List<Animal> animals = new ArrayList<>();
-//            List<Care> cares = new ArrayList<>();
-//
-//            for (ResponseDto responseDto : allResponseDtos) {
-//                // Care 엔티티를 먼저 저장
-//                Care care = responseDto.toEntitycare();
-//                care = careRepository.save(care);
-//
-//                // Animal 엔티티에 저장된 Care 엔티티 설정
-//                Animal animal = responseDto.toEntityanimal();
-//                animal.setCare(care);
-//                animals.add(animal);
-//            }
-//
-//            animalRepository.saveAll(animals);
-//
-//            log.info("총 {} 건의 데이터를 데이터베이스에 저장했습니다.", allResponseDtos.size());
-//        }
-        if (!allResponseDtos.isEmpty()) {
-            Map<String, Care> careMap = new HashMap<>();
+        if (!allAnimalResponseDtos.isEmpty()) {
             List<Animal> animals = new ArrayList<>();
 
-            for (ResponseDto responseDto : allResponseDtos) {
-                // Care 고유 키 구성
-                String careKey = responseDto.getCareNm() + "|" + responseDto.getCareTel();
+            for (AnimalResponseDto animalResponseDto : allAnimalResponseDtos) {
+                // 동물 객체 생성
+                Animal animal = animalResponseDto.toEntityanimal();
 
-                // 중복되지 않는 Care만 Map에 저장
-                Care care = careMap.computeIfAbsent(careKey, k -> responseDto.toEntitycare());
+                Shelter shelter = findShelter(animalResponseDto);
 
-                // Animal 생성 및 Care 주입
-                Animal animal = responseDto.toEntityanimal();
-                animal.setCare(care);
+                animal.setShelter(shelter);
+                if (shelter != null) {
+                    log.info("동물 {} 에 보호소 ID {} 설정됨", animal.getDesertionNo(), shelter.getShelterId());
+                } else {
+                    log.warn("동물 {} 에 보호소 정보가 없어 null로 설정됨", animal.getDesertionNo());
+                }
+
                 animals.add(animal);
             }
 
-            // 먼저 중복 제거된 Care 저장
-            List<Care> savedCares = careRepository.saveAll(new ArrayList<>(careMap.values()));
-
-            // Animal 저장
-            animalRepository.saveAll(animals);
-
-            log.info("총 {} 건의 데이터를 데이터베이스에 저장했습니다.", allResponseDtos.size());
+            if (!animals.isEmpty()) {
+                animalRepository.saveAll(animals);
+                log.info("총 {} 건의 데이터를 데이터베이스에 저장했습니다.", animals.size());
+            } else {
+                log.warn("저장할 동물 데이터가 없습니다.");
+            }
         }
 
 
-        return allResponseDtos;
+        return allAnimalResponseDtos;
     }
 
+    private Shelter findShelter(AnimalResponseDto animalResponseDto) {
+        Shelter shelter = null;
+        String careNm = animalResponseDto.getCareNm();
+        String careRegNo = animalResponseDto.getCareRegNo();
+
+        if (careRegNo != null && !careRegNo.isEmpty()) {
+            List<Shelter> shelters = shelterRepository.findByCareRegNo(careRegNo);
+            if (!shelters.isEmpty()) {
+                return shelters.get(0);
+            }
+        }
+
+        if (careNm != null && !careNm.isEmpty()) {
+            List<Shelter> shelters = shelterRepository.findByCareNm(careNm);
+            if (!shelters.isEmpty()) {
+                return shelters.get(0);
+            }
+        }
+
+        if ((careRegNo != null && !careRegNo.isEmpty()) || (careNm != null && !careNm.isEmpty())) {
+            Shelter newShelter = Shelter.builder()
+                    .careRegNo(animalResponseDto.getCareRegNo())
+                    .careNm(animalResponseDto.getCareNm())
+                    .careTel(animalResponseDto.getCareTel())
+                    .careAddr(animalResponseDto.getCareAddr())
+                    .orgNm(animalResponseDto.getOrgNm())
+                    .build();
+
+            shelter = shelterRepository.save(newShelter);
+            log.info("새 보호소 생성 및 저장: {}, 보호소 번호: {}", shelter.getCareNm(), shelter.getCareRegNo());
+            return shelter;
+        }
+
+        return null;
+
+    }
 }
 
 

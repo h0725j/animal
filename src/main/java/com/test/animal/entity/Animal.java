@@ -1,7 +1,25 @@
 package com.test.animal.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import com.test.animal.entity.type.ActiveState;
+import com.test.animal.entity.type.NeuterYn;
+import com.test.animal.entity.type.ProcessState;
+import com.test.animal.entity.type.SexCd;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -46,11 +64,17 @@ public class Animal {
     @Column(columnDefinition = "TEXT")
     private String popfile2; // 이미지2(텍스트)
 
-    private String processState; // 상태
+    @Enumerated(EnumType.STRING)
+    private ProcessState processState; // 상태
 
-    private String sexCd; // 성별(타입)
+    @Enumerated(EnumType.STRING)
+    private ActiveState activeState;
 
-    private String neuterYn; // 중성화여부(타입)
+    @Enumerated(EnumType.STRING)
+    private SexCd sexCd; // 성별
+
+    @Enumerated(EnumType.STRING)
+    private NeuterYn neuterYn; // 중성화여부(타입)
 
     private String specialMark; // 특징
 
@@ -58,5 +82,7 @@ public class Animal {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "shelter_id")
-    private Care care; // 보호소id(외래키)
+    private Shelter shelter; // 보호소id(외래키)
+
+
 }
