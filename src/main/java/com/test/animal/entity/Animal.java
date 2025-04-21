@@ -21,6 +21,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Entity
 @Getter
 @Setter
@@ -36,7 +40,7 @@ public class Animal {
 
     private String desertionNo; // 구조번호
 
-    private String happenDt; // 접수일
+    private LocalDate happenDt; // 접수일
 
     private String happenPlace; // 발견장소
 
@@ -56,7 +60,9 @@ public class Animal {
 
     private String noticeNo; // 공고번호
 
-    private String noticeSdt; // 공고시작일
+    private LocalDate noticeSdt; // 공고시작일
+
+    private LocalDate noticeEdt; // 공고종료일
 
     @Column(columnDefinition = "TEXT")
     private String popfile1; // 이미지1(텍스트)
@@ -78,7 +84,7 @@ public class Animal {
 
     private String specialMark; // 특징
 
-    private String updTm; // 수정일
+    private LocalDateTime updTm; // 수정일
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "shelter_id")
